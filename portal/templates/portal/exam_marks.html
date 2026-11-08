@@ -1,0 +1,36 @@
+{% extends "portal/base.html" %}
+{% block title %}Marks - {{ exam.label }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb"><ol class="breadcrumb small"><li class="breadcrumb-item"><a href="{% url 'offering_detail' o.pk %}">{{ o.course.code }} &middot; {{ o.session }}</a></li><li class="breadcrumb-item"><a href="{% url 'exam_detail' exam.pk %}">{{ exam.label }}</a></li><li class="breadcrumb-item active">Marks</li></ol></nav>
+<h1 class="page-title mb-1">{{ exam.label }} marks <span class="badge text-bg-dark align-middle">out of {{ exam.max_marks|floatformat:"-2" }}</span></h1>
+<p class="text-muted">{{ o.course.code }} &ndash; {{ o.course.name }}. Type the marks; tick <strong>AB</strong> for an absent student; leave a row empty if the mark is not ready. Press Enter to jump to the next student.</p>
+{% if not editable %}<div class="alert alert-warning"><i class="bi bi-lock-fill"></i> This exam is locked. Only the superuser can change its marks.</div>{% endif %}
+{% if rows %}
+<form method="post">{% csrf_token %}
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th>#</th><th>Admission No</th><th>Name</th><th>{{ LEVEL }} then</th><th class="text-center">Marks</th><th class="text-center">Absent</th></tr></thead><tbody>
+  {% for r in rows %}<tr {% if r.error %}class="table-danger"{% endif %}>
+    <td>{{ forloop.counter }}</td><td class="fw-semibold">{{ r.e.student.admission_no }}</td>
+    <td>{{ r.e.student.name }}{% if r.e.is_backlog %} <span class="badge text-bg-warning">Backlog attempt</span>{% endif %}</td>
+    <td>{{ r.e.student_term }}</td>
+    <td class="text-center"><input class="form-control markbox d-inline-block {% if r.error %}is-invalid{% endif %}" type="number" step="0.5" min="0" max="{{ exam.max_marks }}" name="m_{{ r.e.id }}" value="{{ r.value }}" {% if not editable or r.ab %}disabled{% endif %} data-row>
+      {% if r.error %}<div class="text-danger small">{{ r.error }}</div>{% endif %}</td>
+    <td class="text-center"><input class="form-check-input ab" type="checkbox" name="ab_{{ r.e.id }}" {% if r.ab %}checked{% endif %} {% if not editable %}disabled{% endif %}></td>
+  </tr>{% endfor %}
+</tbody></table></div>
+{% if editable %}<div class="d-flex gap-2"><button class="btn btn-dark" type="submit"><i class="bi bi-save"></i> Save marks</button><a class="btn btn-outline-secondary" href="{% url 'exam_detail' exam.pk %}">Cancel</a></div>{% endif %}
+</form>
+{% else %}<div class="alert alert-light border">No students are enrolled in this {{ PAPER_L }} yet.</div>{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+  const boxes = [...document.querySelectorAll('input[data-row]')];
+  document.querySelectorAll('input.ab').forEach(cb => cb.addEventListener('change', () => {
+    const box = cb.closest('tr').querySelector('input[data-row]');
+    box.disabled = cb.checked; if (cb.checked) box.value = '';
+  }));
+  boxes.forEach((b, i) => b.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); for (let j = i + 1; j < boxes.length; j++) { if (!boxes[j].disabled) { boxes[j].focus(); boxes[j].select(); break; } } }
+  }));
+</script>
+{% endblock %}

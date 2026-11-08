@@ -1,0 +1,12 @@
+{% extends "portal/base.html" %}
+{% block title %}Teachers{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-3"><h1 class="page-title">Teachers</h1>
+  <a class="btn btn-dark ms-auto" href="{% url 'teacher_add' %}"><i class="bi bi-person-plus"></i> Add teacher</a></div>
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Allotted {{ PAPERS_L }}</th></tr></thead><tbody>
+  {% for r in rows %}<tr><td class="fw-semibold">{{ r.t.get_full_name|default:"-" }}</td><td>{{ r.t.username }}</td><td>{{ r.t.email|default:"-" }}</td>
+    <td>{% for o in r.papers %}<a class="badge text-bg-light border text-decoration-none" href="{% url 'offering_detail' o.pk %}">{{ o.course.code }} &middot; {{ o.session }}</a> {% empty %}<span class="text-muted">None yet</span>{% endfor %}</td></tr>
+  {% empty %}<tr><td colspan="4" class="text-center text-muted py-4">No teachers yet. Add the first one.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

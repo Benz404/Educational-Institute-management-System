@@ -1,0 +1,7 @@
+{% extends "portal/base.html" %}
+{% block title %}Setup{% endblock %}
+{% block content %}
+<div class="text-center py-5"><i class="bi bi-shield-lock" style="font-size:3.5rem"></i>
+<h1 class="h3 mt-2">Open this page on the computer where the portal is installed</h1>
+<p class="mx-auto" style="max-width:560px">For safety, the one-time setup can only be completed from the installation computer (address <code>http://localhost:8000</code>). If you are installing on a hosting service, start it with the setting <code>PORTAL_SETUP_ANYWHERE=1</code> and finish the setup right away.</p></div>
+{% endblock %}

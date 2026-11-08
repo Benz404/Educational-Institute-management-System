@@ -1,0 +1,19 @@
+{% extends "portal/base.html" %}
+{% block title %}Backlogs{% endblock %}
+{% block content %}
+<h1 class="page-title mb-2">Backlogs</h1>
+<p class="text-muted">A student is marked as backlog in a {{ PAPER_L }} when their total is below the pass mark after all three exams. Add them to the next session from that {{ PAPER_L }}'s <em>Backlog students</em> page.</p>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-3"><select class="form-select" name="status" onchange="this.form.submit()">
+    <option value="OPEN" {% if status == 'OPEN' %}selected{% endif %}>Open backlogs</option><option value="CLEARED" {% if status == 'CLEARED' %}selected{% endif %}>Cleared</option><option value="ALL" {% if status == 'ALL' %}selected{% endif %}>All</option></select></div>
+  <div class="col-md-4"><select class="form-select" name="term" onchange="this.form.submit()"><option value="">All {{ LEVELS_L }}</option>
+    {% for t in terms %}<option value="{{ t.id }}" {% if term == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</select></div>
+</form>
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th>Admission No</th><th>Student</th><th>{{ PAPER }}</th><th>{{ LEVEL }}</th><th>Failed in</th><th>Status</th></tr></thead><tbody>
+  {% for b in backlogs %}<tr><td class="fw-semibold">{{ b.student.admission_no }}</td><td><a href="{% url 'student_detail' b.student_id %}">{{ b.student.name }}</a></td>
+    <td>{{ b.course.code }} &ndash; {{ b.course.name }}</td><td>{{ b.course.term }}</td><td>{{ b.origin.session|default:"-" }}</td>
+    <td><span class="badge {% if b.status == 'OPEN' %}text-bg-warning{% else %}text-bg-success{% endif %}">{{ b.get_status_display }}</span>{% if b.cleared_in %} <span class="small text-muted">{{ b.cleared_in.session }}</span>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">No backlogs to show.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

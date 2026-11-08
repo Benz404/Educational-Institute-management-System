@@ -1,0 +1,19 @@
+{% extends "portal/base.html" %}
+{% block title %}{{ PAPERS }}{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3"><h1 class="page-title">{% if user.is_superuser %}{{ PAPERS }}{% else %}My {{ PAPERS_L }}{% endif %}</h1>
+  {% if user.is_superuser %}<a class="btn btn-dark ms-auto" href="{% url 'offering_open' %}"><i class="bi bi-journal-plus"></i> Open {{ PAPERS_L }} for a session</a>{% endif %}</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-3"><select class="form-select" name="session" onchange="this.form.submit()"><option value="">All sessions</option>
+    {% for s in sessions %}<option value="{{ s }}" {% if session == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-md-4"><select class="form-select" name="term" onchange="this.form.submit()"><option value="">All {{ LEVELS_L }}</option>
+    {% for t in terms %}<option value="{{ t.id }}" {% if term == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</select></div>
+</form>
+<div class="table-responsive"><table class="table table-hover align-middle">
+  <thead><tr><th>Session</th><th>{{ LEVEL }}</th><th>Code</th><th>{{ PAPER }}</th><th>Teacher(s)</th><th class="text-center">Enrolled</th><th></th></tr></thead><tbody>
+  {% for o in offerings %}<tr><td>{{ o.session }}</td><td>{{ o.course.term }}</td><td class="fw-semibold">{{ o.course.code }}</td><td>{{ o.course.name }}</td>
+    <td>{% for a in o.allotments.all %}{{ a.teacher.get_full_name|default:a.teacher.username }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-muted">Not allotted</span>{% endfor %}</td>
+    <td class="text-center">{{ o.n }}</td><td class="text-end"><a class="btn btn-sm btn-dark" href="{% url 'offering_detail' o.pk %}">Open</a></td></tr>
+  {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">No {{ PAPERS_L }} to show.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

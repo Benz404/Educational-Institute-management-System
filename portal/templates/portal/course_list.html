@@ -1,0 +1,15 @@
+{% extends "portal/base.html" %}
+{% block title %}Syllabus{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3"><h1 class="page-title">Syllabus (all {{ PAPERS_L }})</h1>
+  <a class="btn btn-dark ms-auto" href="{% url 'course_add' %}"><i class="bi bi-plus-lg"></i> Add {{ PAPER_L }}</a>
+  <a class="btn btn-outline-dark" href="{% url 'course_import' %}"><i class="bi bi-upload"></i> Import list</a>
+  <a class="btn btn-outline-dark" href="{% url 'offering_open' %}"><i class="bi bi-journal-plus"></i> Open {{ PAPERS_L }} for a session</a></div>
+<form class="row g-2 mb-3" method="get"><div class="col-md-4"><select class="form-select" name="term" onchange="this.form.submit()"><option value="">All classes</option>
+  {% for t in terms %}<option value="{{ t.id }}" {% if term == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</select></div></form>
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th>{{ LEVEL }}</th><th>Code</th><th>{{ PAPER }}</th><th>Credits</th><th>Compulsory</th></tr></thead><tbody>
+  {% for c in courses %}<tr><td>{{ c.term }}</td><td class="fw-semibold">{{ c.code }}</td><td>{{ c.name }}</td><td>{{ c.credits }}</td><td>{% if c.compulsory %}Yes{% else %}Optional{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="5" class="text-center text-muted py-4">No {{ PAPERS_L }} yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

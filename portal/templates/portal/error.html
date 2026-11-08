@@ -1,0 +1,6 @@
+{% extends "portal/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="text-center py-5"><div class="display-3 fw-bold">{{ code }}</div><h1 class="h3">{{ title }}</h1><p>{{ text }}</p>
+<a class="btn btn-dark" href="{% url 'index' %}">Go to home</a></div>
+{% endblock %}

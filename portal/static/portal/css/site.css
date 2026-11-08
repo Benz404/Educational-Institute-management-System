@@ -1,0 +1,30 @@
+:root { --bs-body-bg:#fff; --bs-body-color:#000; --bs-link-color:#0b3d91; --bs-link-hover-color:#072a66; }
+body { background:#fff; color:#000; font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif; }
+.site-header { background:#fff; border-bottom:1px solid #dee2e6; }
+.site-header .logo { height:66px; width:auto; border-radius:8px; }
+.site-header .college { font-size:1.7rem; font-weight:700; letter-spacing:.02em; line-height:1.1; color:#000; margin:0; }
+.site-header .dept { font-size:1.05rem; color:#000; margin:0; }
+.site-nav { background:#fff; border-bottom:2px solid #000; }
+.site-nav .nav-link { color:#000; font-weight:500; padding:.7rem .6rem; white-space:nowrap; font-size:.94rem; }
+.site-nav button.nav-link { border:0; }
+.site-nav .nav-link:hover, .site-nav .nav-link.active { color:#0b3d91; }
+.site-footer { border-top:1px solid #dee2e6; color:#000; font-size:.92rem; }
+.card { border-color:#dee2e6; }
+.card-header { background:#fff; font-weight:600; border-bottom:1px solid #dee2e6; }
+.table > :not(caption) > * > * { padding:.5rem .65rem; }
+.table thead th { background:#f8f9fa; border-bottom:1px solid #000; color:#000; font-weight:600; white-space:nowrap; }
+.stat { font-size:1.9rem; font-weight:700; line-height:1.1; }
+.stat-label { color:#495057; font-size:.85rem; }
+.hero { padding:3.2rem 0 2.2rem; }
+.hero .logo { height:110px; border-radius:12px; }
+.markbox { width:6.5rem; text-align:center; }
+.page-title { font-size:1.55rem; font-weight:700; margin:0; }
+.badge-soft { font-weight:500; }
+@media print { .site-header .btn, .site-nav, .site-footer, .no-print { display:none !important; } }
+.logo-fallback { display:inline-flex; align-items:center; justify-content:center; width:66px; height:66px; border-radius:12px; background:#000; color:#fff; font-size:2rem; }
+.logo-fallback.big { width:110px; height:110px; font-size:3.4rem; border-radius:16px; }
+.wizard-steps .step { display:flex; align-items:center; gap:.45rem; color:#6c757d; font-weight:500; }
+.wizard-steps .step .num { width:1.9rem; height:1.9rem; border-radius:50%; border:2px solid #adb5bd; display:inline-flex; align-items:center; justify-content:center; font-size:.9rem; }
+.wizard-steps .step.done .num { background:#000; border-color:#000; color:#fff; }
+.wizard-steps .step.current { color:#000; }
+.wizard-steps .step.current .num { border-color:#000; color:#000; }

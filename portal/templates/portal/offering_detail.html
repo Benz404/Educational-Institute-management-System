@@ -1,0 +1,81 @@
+{% extends "portal/base.html" %}
+{% block title %}{{ o.course.code }}{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-start gap-2 mb-3">
+  <div>
+    <div class="text-muted small">{{ o.course.term }} &middot; Session {{ o.session }} &middot; {% if o.course.compulsory %}Compulsory{% else %}Optional{% endif %}{% if o.course.credits %} &middot; {{ o.course.credits|floatformat:"-1" }} credits{% endif %}</div>
+    <h1 class="page-title">{{ o.course.code }} &ndash; {{ o.course.name }}</h1>
+    <div class="small">Teacher{{ teachers|length|pluralize }}: {% for t in teachers %}<strong>{{ t.get_full_name|default:t.username }}</strong>{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-muted">not allotted yet</span>{% endfor %}</div>
+  </div>
+  <div class="ms-auto d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-dark" href="{% url 'offering_backlogs' o.pk %}"><i class="bi bi-arrow-repeat"></i> Backlog students{% if summary.open_backlogs %} <span class="badge text-bg-warning">{{ summary.open_backlogs }}</span>{% endif %}</a>
+    {% if can_manage %}
+    <a class="btn btn-outline-dark" href="{% url 'offering_enrol' o.pk %}"><i class="bi bi-person-plus"></i> Enrol students</a>
+    <a class="btn btn-outline-dark" href="{% url 'offering_allot' o.pk %}"><i class="bi bi-person-badge"></i> Allot teachers</a>{% endif %}
+  </div>
+</div>
+
+<h2 class="h5">Exams</h2>
+<div class="row g-3 mb-4">
+  {% for ex in exams %}
+  <div class="col-md-4"><div class="card h-100">
+    <div class="card-body">
+      <div class="d-flex align-items-center"><h3 class="h6 mb-0">{{ ex.label }}</h3><span class="badge text-bg-dark ms-2">{{ ex.max_marks|floatformat:"-2" }} marks</span>
+        {% if ex.is_locked %}<i class="bi bi-lock-fill ms-auto" title="Locked"></i>{% endif %}</div>
+      <div class="small text-muted mt-2">
+        <div><i class="bi bi-file-earmark-pdf"></i> Question paper: {% if ex.question_paper %}<span class="text-success">uploaded</span>{% else %}<span class="text-danger">not uploaded</span>{% endif %}</div>
+        <div><i class="bi bi-clipboard-check"></i> Marks: {{ ex.insight.entered }} of {{ ex.insight.enrolled }} entered</div>
+        {% if ex.insight.mean_pct != None %}<div><i class="bi bi-graph-up"></i> Average {{ ex.insight.mean|floatformat:"-2" }}/{{ ex.max_marks|floatformat:"-2" }} ({{ ex.insight.mean_pct }}%)</div>{% endif %}
+      </div>
+    </div>
+    <div class="card-footer bg-white d-flex gap-2">
+      <a class="btn btn-dark btn-sm" href="{% url 'exam_marks' ex.pk %}"><i class="bi bi-pencil-square"></i> Marks</a>
+      <a class="btn btn-outline-dark btn-sm" href="{% url 'exam_detail' ex.pk %}"><i class="bi bi-graph-up"></i> Insights &amp; question paper</a>
+    </div>
+  </div></div>
+  {% endfor %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5"><div class="card h-100"><div class="card-header">{{ PAPER }} at a glance</div><div class="card-body">
+    <div class="row text-center g-2 mb-3">
+      <div class="col-3"><div class="stat">{{ summary.enrolled }}</div><div class="stat-label">Enrolled</div></div>
+      <div class="col-3"><div class="stat text-success">{{ summary.counts.PASS }}</div><div class="stat-label">Passed</div></div>
+      <div class="col-3"><div class="stat text-danger">{{ summary.counts.FAIL }}</div><div class="stat-label">Failed</div></div>
+      <div class="col-3"><div class="stat text-secondary">{{ summary.counts.PENDING }}</div><div class="stat-label">Pending</div></div>
+    </div>
+    <ul class="small mb-0">
+      {% if summary.pass_rate != None %}<li>Pass rate so far: <strong>{{ summary.pass_rate }}%</strong> of students with complete marks.</li>{% else %}<li>Results will appear once all three exams have marks.</li>{% endif %}
+      {% if summary.retakers %}<li>{{ summary.retakers }} student{{ summary.retakers|pluralize }} re-attempting this {{ PAPER_L }} (backlog).</li>{% endif %}
+      {% if summary.open_backlogs %}<li>Students with an open backlog in this {{ PAPER_L }}: <strong>{{ summary.open_backlogs }}</strong>.</li>{% endif %}
+    </ul>
+  </div></div></div>
+  <div class="col-lg-7"><div class="card h-100"><div class="card-header">Class average by exam (% of full marks)</div><div class="card-body"><canvas id="avgChart" height="140"></canvas></div></div></div>
+</div>
+
+<h2 class="h5">Enrolled students ({{ summary.enrolled }})</h2>
+<div class="table-responsive"><table class="table table-hover align-middle">
+  <thead><tr><th>#</th><th>Admission No</th><th>Name</th><th>{{ LEVEL }} then</th>{% for e in EXAM_COLS %}<th class="text-center">{{ e.name }}</th>{% endfor %}<th class="text-center">Total</th><th>Result</th></tr></thead><tbody>
+  {% for r in summary.results %}<tr>
+    <td>{{ forloop.counter }}</td><td class="fw-semibold">{{ r.student.admission_no }}</td>
+    <td><a href="{% url 'student_detail' r.student.pk %}">{{ r.student.name }}</a>{% if r.is_backlog %} <span class="badge text-bg-warning">Backlog attempt</span>{% endif %}</td>
+    <td>{{ r.enrollment.student_term }}</td>
+    {% for c in r.cells %}<td class="text-center">{% if c.text == "AB" %}<span class="text-danger fw-semibold">AB</span>{% else %}{{ c.text|default:"-" }}{% endif %}</td>{% endfor %}
+    <td class="text-center">{% if r.status == "PENDING" %}-{% else %}{{ r.total|floatformat:"-2" }}{% endif %}</td>
+    <td><span class="badge {% if r.status == 'PASS' %}text-bg-success{% elif r.status == 'FAIL' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ r.status|title }}</span></td>
+  </tr>{% empty %}<tr><td colspan="9" class="text-center text-muted py-4">No students are enrolled yet.{% if can_manage %} <a href="{% url 'offering_enrol' o.pk %}">Enrol students</a>.{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{{ chart|json_script:"chart-data" }}
+{% endblock %}
+{% block scripts %}
+{% load static %}
+<script src="{% static 'portal/js/chart.umd.min.js' %}"></script>
+<script>
+  const d = JSON.parse(document.getElementById('chart-data').textContent);
+  new Chart(document.getElementById('avgChart'), {
+    type: 'bar',
+    data: {labels: d.labels, datasets: [{label: 'Average %', data: d.values, backgroundColor: '#212529'}]},
+    options: {scales: {y: {beginAtZero: true, max: 100, ticks: {callback: v => v + '%'}}}, plugins: {legend: {display: false}}}
+  });
+</script>
+{% endblock %}

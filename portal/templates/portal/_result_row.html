@@ -1,0 +1,8 @@
+<tr>
+  <td class="fw-semibold">{{ r.course.code }}</td>
+  <td>{{ r.course.name }}{% if r.is_backlog %} <span class="badge text-bg-warning">Backlog attempt</span>{% endif %}</td>
+  {% for c in r.cells %}<td class="text-center">{% if c.text == "AB" %}<span class="text-danger fw-semibold">AB</span>{% else %}{{ c.text|default:"-" }}{% endif %}</td>{% endfor %}
+  <td class="text-center">{% if r.status == "PENDING" %}-{% else %}{{ r.total|floatformat:"-2" }}{% endif %}</td>
+  {% if SITE.use_grades %}<td class="text-center">{{ r.grade|default:"-" }}</td>{% endif %}
+  <td><span class="badge {% if r.status == 'PASS' %}text-bg-success{% elif r.status == 'FAIL' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ r.status|title }}</span></td>
+</tr>

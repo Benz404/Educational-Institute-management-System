@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+venv/
+db.sqlite3
+.secret_key
+media/*
+!media/.gitkeep
+backups/*
+!backups/.gitkeep
+staticfiles/*
+!staticfiles/.gitkeep

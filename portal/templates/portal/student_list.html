@@ -1,0 +1,35 @@
+{% extends "portal/base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <h1 class="page-title">Students</h1>
+  {% if user.is_superuser %}<div class="ms-auto d-flex gap-2">
+    <a class="btn btn-dark" href="{% url 'student_add' %}"><i class="bi bi-person-plus"></i> Add student</a>
+    <a class="btn btn-outline-dark" href="{% url 'student_import' %}"><i class="bi bi-upload"></i> Import</a></div>{% endif %}
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input class="form-control" name="q" value="{{ f.q }}" placeholder="Search admission no, name or mobile"></div>
+  <div class="col-md-3"><select class="form-select" name="term"><option value="">All {{ LEVELS_L }}</option>
+    {% for t in terms %}<option value="{{ t.id }}" {% if f.term == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><select class="form-select" name="session"><option value="">All sessions</option>
+    {% for s in sessions %}<option value="{{ s }}" {% if f.session == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-md-1"><input class="form-control" name="section" value="{{ f.section }}" placeholder="Sec"></div>
+  <div class="col-md-2"><button class="btn btn-dark w-100" type="submit"><i class="bi bi-search"></i> Search</button></div>
+</form>
+<p class="text-muted small">{{ page.paginator.count }} student{{ page.paginator.count|pluralize }} found.{% if not user.is_superuser %} You can see students enrolled in your {{ PAPERS_L }}.{% endif %}</p>
+<div class="table-responsive"><table class="table table-hover align-middle">
+  <thead><tr><th>Admission No</th><th>Name</th><th>{{ LEVEL }}</th><th>Section</th><th>Session</th><th>Mobile</th><th></th></tr></thead>
+  <tbody>
+  {% for s in page %}
+  <tr><td class="fw-semibold">{{ s.admission_no }}</td><td><a href="{% url 'student_detail' s.pk %}">{{ s.name }}</a>{% if not s.is_active %} <span class="badge text-bg-secondary">inactive</span>{% endif %}</td>
+    <td>{{ s.term }}</td><td>{{ s.section }}</td><td>{{ s.session }}</td><td>{{ s.mobile }}</td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-dark" href="{% url 'student_detail' s.pk %}">View</a></td></tr>
+  {% empty %}<tr><td colspan="7" class="text-muted text-center py-4">No students found.</td></tr>{% endfor %}
+  </tbody></table></div>
+{% if page.paginator.num_pages > 1 %}
+<nav><ul class="pagination">
+  {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?{{ qs }}&page={{ page.previous_page_number }}">Previous</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span></li>
+  {% if page.has_next %}<li class="page-item"><a class="page-link" href="?{{ qs }}&page={{ page.next_page_number }}">Next</a></li>{% endif %}
+</ul></nav>{% endif %}
+{% endblock %}

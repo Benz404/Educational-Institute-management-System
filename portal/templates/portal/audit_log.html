@@ -1,0 +1,16 @@
+{% extends "portal/base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+<h1 class="page-title mb-2">Mark change log</h1>
+<form class="row g-2 mb-3" method="get"><div class="col-md-4"><input class="form-control" name="q" value="{{ q }}" placeholder="Admission no or {{ PAPER_L }} code"></div><div class="col-md-2"><button class="btn btn-dark w-100" type="submit">Filter</button></div></form>
+<div class="table-responsive"><table class="table table-sm align-middle">
+  <thead><tr><th>When</th><th>By</th><th>Admission No</th><th>{{ PAPER }}</th><th>Session</th><th>Exam</th><th>Old</th><th>New</th></tr></thead><tbody>
+  {% for l in page %}<tr><td>{{ l.changed_at|date:"d-m-Y H:i" }}</td><td>{{ l.changed_by|default:"-" }}</td><td>{{ l.admission_no }}</td><td>{{ l.paper }}</td><td>{{ l.session }}</td><td>{{ l.exam }}</td><td>{{ l.old_value|default:"-" }}</td><td>{{ l.new_value|default:"(cleared)" }}</td></tr>
+  {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">Nothing logged yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if page.paginator.num_pages > 1 %}<nav><ul class="pagination">
+  {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ page.previous_page_number }}">Newer</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Page {{ page.number }} of {{ page.paginator.num_pages }}</span></li>
+  {% if page.has_next %}<li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ page.next_page_number }}">Older</a></li>{% endif %}
+</ul></nav>{% endif %}
+{% endblock %}

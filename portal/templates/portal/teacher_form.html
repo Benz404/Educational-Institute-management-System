@@ -1,0 +1,18 @@
+{% extends "portal/base.html" %}
+{% block title %}Add teacher{% endblock %}
+{% block content %}
+<h1 class="page-title mb-3">Add a teacher</h1>
+<form method="post" class="card" style="max-width:760px"><div class="card-body">{% csrf_token %}
+  <div class="row g-3">
+    {% include "portal/_field.html" with field=form.full_name col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.email col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.username col="col-md-6" %}
+    <div class="col-md-6"></div>
+    {% include "portal/_field.html" with field=form.password1 col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.password2 col="col-md-6" %}
+  </div>
+  <p class="text-muted small mt-3 mb-3">The teacher can change this password after logging in (Password link in the menu). After adding, allot {{ PAPERS_L }} so they appear on the teacher's dashboard.</p>
+  <button class="btn btn-dark" type="submit"><i class="bi bi-person-plus"></i> Create teacher login</button>
+  <a class="btn btn-outline-secondary" href="{% url 'teacher_list' %}">Cancel</a>
+</div></form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "portal/base.html" %}
+{% block title %}Enrol students{% endblock %}
+{% block content %}
+<h1 class="page-title mb-1">Enrol students</h1>
+<p class="text-muted">{{ o.course.code }} &ndash; {{ o.course.name }} &middot; Session {{ o.session }} &middot; {{ enrolled_count }} already enrolled</p>
+<div class="d-flex flex-wrap gap-2 mb-3">
+  {% if o.course.compulsory %}<form method="post">{% csrf_token %}<button class="btn btn-dark" name="enrol_term" value="1" type="submit"><i class="bi bi-people"></i> Enrol the whole of {{ o.course.term }}</button></form>{% endif %}
+  <a class="btn btn-outline-secondary" href="{% url 'offering_detail' o.pk %}">Back to {{ PAPER_L }}</a>
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-4"><input class="form-control" name="q" value="{{ q }}" placeholder="Search admission no or name"></div>
+  <div class="col-md-4"><select class="form-select" name="term"><option value="">Any {{ LEVEL_L }}</option>
+    {% for t in terms %}<option value="{{ t.id }}" {% if term == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><button class="btn btn-outline-dark w-100" type="submit">Search</button></div>
+</form>
+<form method="post">{% csrf_token %}
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th style="width:3rem"><input class="form-check-input" type="checkbox" onclick="document.querySelectorAll('.pick').forEach(c=>c.checked=this.checked)"></th><th>Admission No</th><th>Name</th><th>{{ LEVEL }}</th><th>Section</th></tr></thead><tbody>
+  {% for s in students %}<tr><td><input class="form-check-input pick" type="checkbox" name="student" value="{{ s.pk }}"></td><td class="fw-semibold">{{ s.admission_no }}</td><td>{{ s.name }}</td><td>{{ s.term }}</td><td>{{ s.section }}</td></tr>
+  {% empty %}<tr><td colspan="5" class="text-center text-muted py-4">No students left to enrol with this filter.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if students %}<button class="btn btn-dark" type="submit"><i class="bi bi-person-plus"></i> Enrol selected students</button>{% endif %}
+</form>
+{% endblock %}

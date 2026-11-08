@@ -1,0 +1,68 @@
+{% extends "portal/base.html" %}
+{% block title %}{{ exam.label }} - {{ o.course.code }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb"><ol class="breadcrumb small"><li class="breadcrumb-item"><a href="{% url 'offering_detail' o.pk %}">{{ o.course.code }} &middot; {{ o.session }}</a></li><li class="breadcrumb-item active">{{ exam.label }}</li></ol></nav>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div><div class="text-muted small">{{ o.course.name }} &middot; {{ o.course.term }}</div>
+    <h1 class="page-title">{{ exam.label }} <span class="badge text-bg-dark align-middle">{{ exam.max_marks|floatformat:"-2" }} marks</span>{% if exam.is_locked %} <i class="bi bi-lock-fill" title="Locked"></i>{% endif %}</h1></div>
+  <div class="ms-auto d-flex gap-2">
+    <a class="btn btn-dark" href="{% url 'exam_marks' exam.pk %}"><i class="bi bi-pencil-square"></i> {% if editable %}Enter / edit marks{% else %}View marks{% endif %}</a>
+    {% if user.is_superuser %}<form method="post" action="{% url 'exam_lock' exam.pk %}">{% csrf_token %}<button class="btn btn-outline-dark" type="submit"><i class="bi bi-lock"></i> {% if exam.is_locked %}Unlock{% else %}Lock{% endif %}</button></form>{% endif %}
+  </div>
+</div>
+
+<div class="card mb-4"><div class="card-header"><i class="bi bi-file-earmark-pdf"></i> Question paper (PDF only)</div><div class="card-body">
+  {% if exam.question_paper %}
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+      <a class="btn btn-outline-dark" target="_blank" href="{% url 'exam_paper_view' exam.pk %}"><i class="bi bi-eye"></i> View question paper</a>
+      <span class="text-muted small">Uploaded {{ exam.paper_uploaded_at|date:"d-m-Y H:i" }}{% if exam.paper_uploaded_by %} by {{ exam.paper_uploaded_by.get_full_name|default:exam.paper_uploaded_by.username }}{% endif %}</span>
+      {% if editable %}<form method="post" action="{% url 'exam_paper_remove' exam.pk %}" class="ms-auto" onsubmit="return confirm('Remove this question paper?')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form>{% endif %}
+    </div>
+  {% else %}<p class="text-muted">No question paper uploaded yet.</p>{% endif %}
+  {% if editable %}
+  <form method="post" action="{% url 'exam_paper_upload' exam.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end">{% csrf_token %}
+    <div class="col-md-7"><label class="form-label" for="pf">{% if exam.question_paper %}Replace with a new PDF{% else %}Choose a PDF file{% endif %}</label>
+      <input class="form-control" type="file" id="pf" name="file" accept="application/pdf,.pdf" required></div>
+    <div class="col-md-3"><button class="btn btn-dark w-100" type="submit"><i class="bi bi-upload"></i> Upload</button></div>
+  </form><div class="form-text">Only .pdf files up to 10 MB are accepted.</div>
+  {% else %}<p class="small text-muted mb-0">This exam is locked, so the {{ PAPER_L }} cannot be changed.</p>{% endif %}
+</div></div>
+
+<h2 class="h5"><i class="bi bi-graph-up"></i> Auto insights</h2>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-2"><div class="card"><div class="card-body py-2"><div class="stat">{{ ins.enrolled }}</div><div class="stat-label">Enrolled</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="card"><div class="card-body py-2"><div class="stat">{{ ins.appeared }}</div><div class="stat-label">Appeared</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="card"><div class="card-body py-2"><div class="stat">{{ ins.absent }}</div><div class="stat-label">Absent</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="card"><div class="card-body py-2"><div class="stat">{{ ins.pending }}</div><div class="stat-label">Marks pending</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="card"><div class="card-body py-2"><div class="stat">{% if ins.mean != None %}{{ ins.mean|floatformat:"-2" }}{% else %}-{% endif %}</div><div class="stat-label">Average</div></div></div></div>
+  <div class="col-6 col-md-2"><div class="card"><div class="card-body py-2"><div class="stat">{% if ins.pass_rate != None %}{{ ins.pass_rate }}%{% else %}-{% endif %}</div><div class="stat-label">At/above pass line</div></div></div></div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header">What the marks say</div><div class="card-body">
+    <ul class="mb-0">{% for n in ins.notes %}<li class="mb-1">{{ n }}</li>{% endfor %}</ul>
+    {% if ins.has_data %}<div class="small text-muted mt-3">Highest {{ ins.highest|floatformat:"-2" }} &middot; Lowest {{ ins.lowest|floatformat:"-2" }} &middot; Median {{ ins.median|floatformat:"-2" }} &middot; Pass line {{ ins.pass_line|floatformat:"-2" }}/{{ ins.max|floatformat:"-2" }}</div>{% endif %}
+  </div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header">Score distribution (number of students per mark band)</div><div class="card-body"><canvas id="distChart" height="150"></canvas></div></div></div>
+</div>
+{% if ins.has_data %}
+<div class="row g-3 mb-4">
+  <div class="col-md-5"><div class="card h-100"><div class="card-header"><i class="bi bi-trophy"></i> Top scorers</div>
+    <ul class="list-group list-group-flush">{% for e, v in ins.top %}<li class="list-group-item d-flex"><a href="{% url 'student_detail' e.student_id %}">{{ e.student.name }}</a><span class="ms-auto fw-semibold">{{ v|floatformat:"-2" }}</span></li>{% endfor %}</ul></div></div>
+  <div class="col-md-7"><div class="card h-100"><div class="card-header"><i class="bi bi-life-preserver"></i> Needs attention (below pass line)</div>
+    {% if ins.attention %}<ul class="list-group list-group-flush">{% for e, v in ins.attention %}<li class="list-group-item d-flex"><a href="{% url 'student_detail' e.student_id %}">{{ e.student.name }}</a> <span class="text-muted ms-2">{{ e.student.admission_no }}</span><span class="ms-auto fw-semibold text-danger">{{ v|floatformat:"-2" }}</span></li>{% endfor %}</ul>
+    {% else %}<div class="card-body text-muted">Nobody is below the pass line.</div>{% endif %}</div></div>
+</div>{% endif %}
+{{ chart|json_script:"chart-data" }}
+{% endblock %}
+{% block scripts %}
+{% load static %}
+<script src="{% static 'portal/js/chart.umd.min.js' %}"></script>
+<script>
+  const d = JSON.parse(document.getElementById('chart-data').textContent);
+  new Chart(document.getElementById('distChart'), {
+    type: 'bar',
+    data: {labels: d.labels, datasets: [{label: 'Students', data: d.values, backgroundColor: '#212529'}]},
+    options: {scales: {y: {beginAtZero: true, ticks: {precision: 0}}}, plugins: {legend: {display: false}}}
+  });
+</script>
+{% endblock %}

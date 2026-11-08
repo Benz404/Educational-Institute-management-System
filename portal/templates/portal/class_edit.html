@@ -1,0 +1,15 @@
+{% extends "portal/base.html" %}
+{% block title %}Edit {{ term.name }}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-3">Edit {{ term.name }}</h1>
+<form method="post" class="card" style="max-width:560px"><div class="card-body">{% csrf_token %}
+  <div class="mb-3"><label class="form-label" for="{{ form.name.id_for_label }}">Name</label>{{ form.name }}{% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+  <div class="mb-3"><label class="form-label" for="{{ form.order.id_for_label }}">Order (position)</label>{{ form.order }}</div>
+  <div class="mb-3"><label class="form-label" for="{{ form.pass_percent.id_for_label }}">Own pass mark (optional)</label>{{ form.pass_percent }}{% for e in form.pass_percent.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    <div class="form-text">Leave empty to use the institution's pass mark ({{ SITE.pass_percent|floatformat:"-2" }}%).</div></div>
+  <button class="btn btn-dark" type="submit"><i class="bi bi-save"></i> Save</button>
+  <a class="btn btn-outline-secondary" href="{% url 'class_list' %}">Cancel</a>
+  {% if not used %}<button class="btn btn-outline-danger float-end" type="submit" name="delete" value="1" onclick="return confirm('Delete this {{ LEVEL_L }}?')">Delete</button>
+  {% else %}<div class="form-text mt-3">It has students or {{ PAPERS_L }}, so it cannot be deleted.</div>{% endif %}
+</div></form>
+{% endblock %}

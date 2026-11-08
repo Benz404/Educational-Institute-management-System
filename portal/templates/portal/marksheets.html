@@ -1,0 +1,29 @@
+{% extends "portal/base.html" %}
+{% block title %}Marksheets{% endblock %}
+{% block content %}
+<h1 class="page-title mb-2">Marksheets</h1>
+<p class="text-muted">Pick a session and {{ LEVEL_L }} to see every student's result and download all their marksheets in one PDF. Open a student to get their complete record across every {{ LEVEL_L }}.</p>
+<form class="row g-2 mb-4" method="get">
+  <div class="col-md-3"><label class="form-label">Session</label><select class="form-select" name="session">
+    {% for s in sessions %}<option value="{{ s }}" {% if s == session %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-md-5"><label class="form-label">{{ LEVEL }}</label><select class="form-select" name="term" required><option value="">Choose</option>
+    {% for t in terms %}<option value="{{ t.id }}" {% if term_id == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2 d-flex align-items-end"><button class="btn btn-dark w-100" type="submit">Show</button></div>
+</form>
+{% if term %}
+  {% if sheets %}
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="btn btn-dark" target="_blank" href="{% url 'marksheet_semester_pdf' %}?session={{ session }}&term={{ term.pk }}"><i class="bi bi-file-earmark-pdf"></i> Download all {{ sheets|length }} marksheets (one PDF)</a>
+  </div>
+  <div class="table-responsive"><table class="table align-middle">
+    <thead><tr><th>Admission No</th><th>Name</th><th>Section</th><th class="text-center">Total</th><th class="text-center">%</th><th>Result</th><th></th></tr></thead><tbody>
+    {% for sh in sheets %}<tr><td class="fw-semibold">{{ sh.student.admission_no }}</td><td><a href="{% url 'student_detail' sh.student.pk %}">{{ sh.student.name }}</a></td><td>{{ sh.student.section }}</td>
+      <td class="text-center">{% if sh.grand_total != None %}{{ sh.grand_total|floatformat:"-2" }}/{{ sh.grand_max|floatformat:"-2" }}{% else %}-{% endif %}</td>
+      <td class="text-center">{% if sh.percent != None %}{{ sh.percent|floatformat:"-2" }}{% else %}-{% endif %}</td>
+      <td><span class="badge {% if sh.result == 'PASS' %}text-bg-success{% elif sh.result == 'FAIL' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ sh.result|title }}</span></td>
+      <td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-dark" target="_blank" href="{% url 'marksheet_student_pdf' sh.student.pk %}?term={{ term.pk }}&session={{ session }}">{{ LEVEL }} PDF</a>
+        <a class="btn btn-sm btn-outline-dark" target="_blank" href="{% url 'marksheet_student_pdf' sh.student.pk %}">Complete record</a></td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="alert alert-light border">No student has {{ PAPERS_L }} in {{ term }} for session {{ session }}.</div>{% endif %}
+{% endif %}
+{% endblock %}

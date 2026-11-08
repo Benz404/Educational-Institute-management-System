@@ -1,0 +1,60 @@
+{% extends "portal/base.html" %}
+{% block title %}{{ student.name }}{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div><h1 class="page-title">{{ student.name }}</h1><div class="text-muted">Admission No. <strong class="text-dark">{{ student.admission_no }}</strong></div></div>
+  <div class="ms-auto d-flex gap-2 no-print">
+    {% if user.is_superuser %}
+      <a class="btn btn-dark" href="{% url 'marksheet_student_pdf' student.pk %}" target="_blank"><i class="bi bi-file-earmark-pdf"></i> Complete record (PDF)</a>
+      <a class="btn btn-outline-dark" href="{% url 'student_edit' student.pk %}"><i class="bi bi-pencil"></i> Edit</a>
+    {% endif %}
+    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+  </div>
+</div>
+<div class="card mb-3"><div class="card-body"><div class="row g-3">
+  <div class="col-md-3"><div class="stat-label">Current {{ LEVEL_L }}</div><div class="fw-semibold">{{ student.term }}</div></div>
+  <div class="col-md-2"><div class="stat-label">Session</div><div class="fw-semibold">{{ student.session }}</div></div>
+  <div class="col-md-2"><div class="stat-label">Section / stream</div><div class="fw-semibold">{{ student.section|default:"-" }} / {{ student.stream|default:"-" }}</div></div>
+  <div class="col-md-3"><div class="stat-label">Father's name</div><div class="fw-semibold">{{ student.father_name|default:"-" }}</div></div>
+  <div class="col-md-2"><div class="stat-label">Status</div><div class="fw-semibold">{% if student.is_active %}Active{% else %}Inactive{% endif %}</div></div>
+  <div class="col-md-3"><div class="stat-label">Date of birth</div><div>{{ student.date_of_birth|date:"d-m-Y"|default:"-" }}</div></div>
+  <div class="col-md-2"><div class="stat-label">Gender</div><div>{{ student.gender|default:"-" }}</div></div>
+  <div class="col-md-2"><div class="stat-label">Category</div><div>{{ student.category|default:"-" }}</div></div>
+  <div class="col-md-3"><div class="stat-label">Mobile</div><div>{{ student.mobile|default:"-" }}</div></div>
+</div></div></div>
+
+{% if open_backlogs %}
+<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> <strong>{{ open_backlogs|length }} open backlog{{ open_backlogs|length|pluralize }}:</strong>
+  {% for b in open_backlogs %}{{ b.course.code }} ({{ b.course.name }}){% if not forloop.last %}, {% endif %}{% endfor %}.
+  They can be added to the next session's {{ PAPER_L }} from that {{ PAPER_L }}'s <em>Backlog students</em> page.</div>
+{% endif %}
+
+<h2 class="h5">{{ PAPERS }} in the department</h2>
+{% for sh in sheets %}
+<div class="card mb-3">
+  <div class="card-header d-flex flex-wrap align-items-center gap-2">
+    <span><i class="bi bi-calendar3"></i> Session {{ sh.session }} &middot; {{ sh.term }}</span>
+    <span class="badge {% if sh.result == 'PASS' %}text-bg-success{% elif sh.result == 'FAIL' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ sh.result|title }}</span>
+    {% if user.is_superuser %}<a class="btn btn-sm btn-outline-dark ms-auto no-print" target="_blank" href="{% url 'marksheet_student_pdf' student.pk %}?term={{ sh.term.pk }}&session={{ sh.session }}"><i class="bi bi-file-earmark-pdf"></i> {{ LEVEL }} marksheet</a>{% endif %}
+  </div>
+  <div class="table-responsive"><table class="table mb-0 align-middle">
+    <thead><tr><th>Code</th><th>{{ PAPER }}</th>{% for e in EXAM_COLS %}<th class="text-center">{{ e.name }} /{{ e.max_marks|floatformat:"-2" }}</th>{% endfor %}<th class="text-center">Total /{{ EXAM_TOTAL }}</th>{% if SITE.use_grades %}<th class="text-center">Grade</th>{% endif %}<th>Result</th></tr></thead>
+    <tbody>
+    {% for r in sh.regular %}{% include "portal/_result_row.html" %}{% endfor %}
+    {% for r in sh.retakes %}{% include "portal/_result_row.html" %}{% endfor %}
+    </tbody></table></div>
+  {% if sh.grand_total != None %}<div class="card-footer bg-white small">Total <strong>{{ sh.grand_total|floatformat:"-2" }}/{{ sh.grand_max|floatformat:"-2" }}</strong> ({{ sh.percent|floatformat:"-2" }}%){% if sh.sgpa != None %} &middot; SGPA <strong>{{ sh.sgpa }}</strong>{% endif %}{% if sh.division %} &middot; {{ sh.division }}{% endif %}</div>{% endif %}
+</div>
+{% empty %}
+<div class="alert alert-light border">This student is not enrolled in any department {{ PAPER_L }} yet.</div>
+{% endfor %}
+
+{% if backlogs %}
+<h2 class="h5 mt-4">Backlog history</h2>
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th>{{ PAPER }}</th><th>Failed in session</th><th>Status</th><th>Cleared in</th></tr></thead><tbody>
+  {% for b in backlogs %}<tr><td>{{ b.course.code }} - {{ b.course.name }}</td><td>{{ b.origin.session|default:"-" }}</td>
+    <td><span class="badge {% if b.status == 'OPEN' %}text-bg-warning{% else %}text-bg-success{% endif %}">{{ b.get_status_display }}</span></td>
+    <td>{{ b.cleared_in.session|default:"-" }}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+{% endblock %}

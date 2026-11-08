@@ -1,0 +1,22 @@
+{% extends "portal/base.html" %}
+{% block title %}Backlog students{% endblock %}
+{% block content %}
+<h1 class="page-title mb-1">Backlog students</h1>
+<p class="text-muted">{{ o.course.code }} &ndash; {{ o.course.name }} &middot; Session {{ o.session }}. Students who failed this {{ PAPER_L }} earlier can be added in one click so they sit this session's exams.</p>
+{% if pending %}
+<form method="post">{% csrf_token %}
+<div class="table-responsive"><table class="table align-middle">
+  <thead><tr><th style="width:3rem"><input class="form-check-input" type="checkbox" onclick="document.querySelectorAll('.pick').forEach(c=>c.checked=this.checked)"></th><th>Admission No</th><th>Name</th><th>{{ LEVEL }} now</th><th>Failed in session</th></tr></thead><tbody>
+  {% for b in pending %}<tr><td><input class="form-check-input pick" type="checkbox" name="student" value="{{ b.student_id }}"></td>
+    <td class="fw-semibold">{{ b.student.admission_no }}</td><td><a href="{% url 'student_detail' b.student_id %}">{{ b.student.name }}</a></td>
+    <td>{{ b.student.term }}</td><td>{{ b.origin.session|default:"-" }}</td></tr>{% endfor %}
+</tbody></table></div>
+<button class="btn btn-dark" type="submit"><i class="bi bi-plus-circle"></i> Add selected to this {{ PAPER_L }}</button>
+<button class="btn btn-outline-dark" type="submit" name="all" value="1"><i class="bi bi-people"></i> Add all backlog students</button>
+</form>
+{% else %}<div class="alert alert-light border">No open backlog students are waiting for this {{ PAPER_L }}.</div>{% endif %}
+{% if already %}
+<h2 class="h5 mt-4">Already re-attempting in {{ o.session }}</h2>
+<ul>{% for e in already %}<li><a href="{% url 'student_detail' e.student_id %}">{{ e.student.name }}</a> ({{ e.student.admission_no }})</li>{% endfor %}</ul>{% endif %}
+<a class="btn btn-outline-secondary mt-3" href="{% url 'offering_detail' o.pk %}">Back to {{ PAPER_L }}</a>
+{% endblock %}

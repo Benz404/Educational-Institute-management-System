@@ -1,0 +1,17 @@
+{% extends "portal/base.html" %}
+{% block title %}Import {{ PAPERS_L }}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-2">Import a list of {{ PAPERS_L }}</h1>
+<p class="text-muted">Upload a CSV or Excel (.xlsx) file with the headings <strong>Class, Code, Name</strong> and optionally <strong>Credits</strong> and <strong>Compulsory</strong> (yes / no).
+The class must match a name on the {{ LEVELS }} page exactly. Existing {{ PAPERS_L }} with the same class and code are updated.
+<a href="{% url 'course_sample_csv' %}">Download a sample file</a> built from your {{ LEVELS_L }}.</p>
+{% if result %}
+<div class="alert alert-success"><strong>{{ result.created }}</strong> added, <strong>{{ result.updated }}</strong> updated.</div>
+{% if result.errors %}<div class="alert alert-warning"><strong>{{ result.errors|length }} row(s) need attention:</strong><ul class="mb-0">{% for e in result.errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+<a class="btn btn-dark mb-3" href="{% url 'course_list' %}">View the list</a>
+{% endif %}
+<form method="post" enctype="multipart/form-data" class="card" style="max-width:640px"><div class="card-body">{% csrf_token %}
+  {% include "portal/_field.html" with field=form.file col="col-12" %}
+  <button class="btn btn-dark mt-3" type="submit"><i class="bi bi-upload"></i> Import</button>
+</div></form>
+{% endblock %}

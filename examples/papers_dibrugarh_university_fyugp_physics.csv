@@ -1,0 +1,49 @@
+Class,Code,Name,Credits,Compulsory
+Semester 1,PHY-C-1,Mechanics and Properties of Matter,4,yes
+Semester 2,PHY-C-2,Waves and Optics,4,yes
+Semester 3,PHY-C-3,Mathematical Physics I,4,yes
+Semester 3,PHY-C-4,Physics Lab I (Major),4,yes
+Semester 4,PHY-C-5,Electricity and Magnetism,4,yes
+Semester 4,PHY-C-6,Thermal Physics,4,yes
+Semester 4,PHY-C-7,Elements of Modern Physics,4,yes
+Semester 4,PHY-C-8,Physics Lab II (Major),4,yes
+Semester 5,PHY-C-9,Mathematical Physics II,4,yes
+Semester 5,PHY-C-10,Quantum Mechanics I,4,yes
+Semester 5,PHY-C-11,Statistical Mechanics I,4,yes
+Semester 6,PHY-C-12,Electromagnetic Theory,4,yes
+Semester 6,PHY-C-13,Condensed Matter Physics I,4,yes
+Semester 6,PHY-C-14,Electronics I,4,yes
+Semester 6,PHY-C-15,Physics Lab III (Major),4,yes
+Semester 7,PHY-C-16,Mathematical Physics III,4,yes
+Semester 7,PHY-C-17,Classical Mechanics,4,yes
+Semester 7,PHY-C-18,Quantum Mechanics II,4,yes
+Semester 8,PHY-C-19,Condensed Matter Physics II,4,yes
+Semester 8,PHY-C-20,Electronics II,4,yes
+Semester 8,PHY-DSE-IA,Nuclear and Particle Physics,4,no
+Semester 8,PHY-DSE-IB,Plasma Physics,4,no
+Semester 8,PHY-DSE-IC,Physics of Devices and Instruments,4,no
+Semester 8,PHY-DSE-ID,Physics Lab IV (Major),4,no
+Semester 8,PHY-DSE-IIA,Astronomy and Astrophysics,4,no
+Semester 8,PHY-DSE-IIB,Nanomaterials and Applications,4,no
+Semester 8,PHY-DSE-IIC,Physics of The Earth,4,no
+Semester 8,PHY-DSE-IID,Computational Physics Lab,4,no
+Semester 8,PHY-DSE-IIE,Physics Lab V (Major),4,no
+Semester 1,PHY-SEC-IA,Electrical Circuits and Network Skills,3,no
+Semester 1,PHY-SEC-IB,Electrical Wiring and Maintenance,3,no
+Semester 2,PHY-SEC-II,Basic Instrumentation Skills,3,no
+Semester 3,PHY-SEC-IIIA,Computational Physics Skills,3,no
+Semester 3,PHY-SEC-IIIB,Renewable Energy and Energy Harvesting,3,no
+Semester 1,PHY-GEC-IA,Evolution of Science,3,no
+Semester 1,PHY-GEC-IB,Introduction to Communication Technology,3,no
+Semester 2,PHY-GEC-IIA,Materials Today,3,no
+Semester 2,PHY-GEC-IIB,Digital and Space Technologies,3,no
+Semester 3,PHY-GEC-IIIA,The Universe,3,no
+Semester 3,PHY-GEC-IIIB,Atmosphere of the Earth and Climate Change,3,no
+Semester 1,PHY-MIN-1,Mechanics,4,no
+Semester 2,PHY-MIN-2,Waves and Optics,4,no
+Semester 3,PHY-MIN-3,Physics Lab I (Minor),4,no
+Semester 4,PHY-MIN-4,Electricity and Magnetism,4,no
+Semester 5,PHY-MIN-5,Thermal Physics,4,no
+Semester 6,PHY-MIN-6,Physics Lab II (Minor),4,no
+Semester 7,PHY-MIN-7,Elements of Modern Physics,4,no
+Semester 8,PHY-MIN-8,Condensed Matter Physics,4,no

@@ -1,0 +1,18 @@
+{% extends "portal/base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-5 col-lg-4">
+  <div class="card shadow-sm"><div class="card-header"><i class="bi bi-box-arrow-in-right"></i> Log in</div>
+  <div class="card-body">
+    {% if form.errors %}<div class="alert alert-danger py-2">Wrong username or password.</div>{% endif %}
+    <form method="post">{% csrf_token %}
+      <div class="mb-3"><label class="form-label" for="id_username">Username</label>
+        <input class="form-control" type="text" name="username" id="id_username" autofocus autocomplete="username" required></div>
+      <div class="mb-3"><label class="form-label" for="id_password">Password</label>
+        <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password" required></div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-dark w-100" type="submit">Log in</button>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}

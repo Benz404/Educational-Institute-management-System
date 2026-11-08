@@ -1,0 +1,129 @@
+{% extends "portal/base.html" %}
+{% block title %}Setup - step {{ step }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-9 col-xl-8">
+<div class="text-center mb-4">
+  <h1 class="page-title">Welcome! Let's set up your portal</h1>
+  <p class="text-muted mb-0">This happens only once. You can change most answers later in Settings.</p>
+</div>
+<div class="wizard-steps d-flex flex-wrap justify-content-center gap-4 mb-4">
+  {% for n, label in steps %}<div class="step {% if n < step %}done{% elif n == step %}current{% endif %}"><span class="num">{% if n < step %}<i class="bi bi-check-lg"></i>{% else %}{{ n }}{% endif %}</span>{{ label }}</div>{% endfor %}
+</div>
+
+<form method="post" class="card shadow-sm"><div class="card-body p-4">{% csrf_token %}
+{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+{% if step == 1 %}
+  <h2 class="h5 mb-3">About your institution</h2>
+  <div class="mb-3"><label class="form-label fw-semibold">{{ form.institution_type.label }}</label>
+    <div class="d-flex flex-wrap gap-3">{% for r in form.institution_type %}<div class="form-check"><label class="form-check-label" for="{{ r.id_for_label }}">{{ r.tag }} {{ r.choice_label }}</label></div>{% endfor %}</div>
+    <div class="form-text">This only chooses sensible starting suggestions for the next steps.</div></div>
+  <div class="row g-3">
+    {% include "portal/_field.html" with field=form.name col="col-12" %}
+    {% include "portal/_field.html" with field=form.department col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.footer col="col-md-6" %}
+  </div>
+
+{% elif step == 2 %}
+  <h2 class="h5 mb-3">Classes</h2>
+  <p class="text-muted">Schools usually have classes 1 to 10; colleges have semesters or years. Name them in the order students move through them.</p>
+  <div class="row g-3 mb-3">
+    {% include "portal/_field.html" with field=form.level_label col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.paper_label col="col-md-6" %}
+  </div>
+  <div class="card bg-light border-0 mb-3"><div class="card-body py-3"><div class="row g-2 align-items-end">
+    <div class="col-md-4"><label class="form-label small mb-1" for="gen_prefix">Quick list: name</label><input class="form-control" id="gen_prefix" value="{{ prefix }}"></div>
+    <div class="col-md-3"><label class="form-label small mb-1" for="gen_from">from</label><input class="form-control" type="number" id="gen_from" value="1" min="0"></div>
+    <div class="col-md-3"><label class="form-label small mb-1" for="gen_to">to</label><input class="form-control" type="number" id="gen_to" value="10" min="1" max="60"></div>
+    <div class="col-md-2"><button class="btn btn-outline-dark w-100" type="button" id="gen_btn">Fill</button></div>
+  </div><div class="form-text">Example: name "Class", from 1 to 10 fills Class 1 ... Class 10. Or type your own names below.</div></div></div>
+  {% include "portal/_field.html" with field=form.classes_text col="col-12" %}
+
+{% elif step == 3 %}
+  <h2 class="h5 mb-3">Exams</h2>
+  <div class="row g-3 mb-2">
+    {% include "portal/_field.html" with field=form.exam_count col="col-md-8" %}
+    <div class="col-md-4 d-flex align-items-end"><div class="small text-muted">Total marks: <strong id="exam_total">-</strong></div></div>
+  </div>
+  <div id="exam_rows">
+  {% for i, name, mx in exam_slots %}
+    <div class="row g-2 mb-2 exam-row" data-i="{{ i }}">
+      <div class="col-7 col-md-8"><label class="form-label small mb-1">Exam {{ i }} name</label><input class="form-control exam-name" name="exam_name_{{ i }}" value="{{ name }}" maxlength="60"></div>
+      <div class="col-5 col-md-4"><label class="form-label small mb-1">Maximum marks</label><input class="form-control exam-max" type="number" step="0.5" min="1" name="exam_max_{{ i }}" value="{{ mx }}"></div>
+    </div>
+  {% endfor %}
+  </div>
+  <p class="form-text">Every {{ level|lower }}'s subjects use the same exams. Example: Sessional 1 (20), Sessional 2 (20), Final (60). Exams cannot be changed after subjects are opened for a session.</p>
+  <hr>
+  <h2 class="h5 mb-3">Result rules</h2>
+  <div class="row g-3">
+    {% include "portal/_field.html" with field=form.pass_percent col="col-md-4" %}
+    {% include "portal/_field.html" with field=form.signatures col="col-md-8" %}
+    <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="use_grades" id="id_use_grades" {% if form.use_grades.value %}checked{% endif %}><label class="form-check-label" for="id_use_grades">{{ form.use_grades.label }}</label></div></div>
+    {% include "portal/_field.html" with field=form.grade_bands col="col-md-6" %}
+    <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="show_division" id="id_show_division" {% if form.show_division.value %}checked{% endif %}><label class="form-check-label" for="id_show_division">{{ form.show_division.label }}</label></div></div>
+    {% include "portal/_field.html" with field=form.division_rules col="col-md-6" %}
+  </div>
+  <div class="form-text mt-2">The grade and division tables are only starting suggestions. Please set them to your board / university rules.</div>
+
+{% else %}
+  <h2 class="h5 mb-3">Your administrator account</h2>
+  <div class="row g-3 mb-4">
+    {% include "portal/_field.html" with field=form.full_name col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.email col="col-md-6" %}
+    {% include "portal/_field.html" with field=form.username col="col-md-4" %}
+    {% include "portal/_field.html" with field=form.password1 col="col-md-4" %}
+    {% include "portal/_field.html" with field=form.password2 col="col-md-4" %}
+  </div>
+  <div class="card bg-light border-0"><div class="card-body small">
+    <div class="fw-semibold mb-2">Please check your answers</div>
+    <div><strong>{{ summary.type }}:</strong> {{ summary.name }}{% if summary.department %} &middot; {{ summary.department }}{% endif %}</div>
+    <div><strong>{{ summary.level }}s ({{ summary.classes|length }}):</strong> {{ summary.classes|join:", " }}</div>
+    <div><strong>Exams per {{ summary.paper|lower }}:</strong> {% for n, m in summary.exams %}{{ n }} ({{ m|floatformat:"-2" }}){% if not forloop.last %}, {% endif %}{% endfor %} &mdash; total {{ summary.exam_total }}</div>
+    <div><strong>Pass mark:</strong> {{ summary.pass_percent }}% &middot; Grades: {% if summary.grades %}yes{% else %}no{% endif %} &middot; Divisions: {% if summary.division %}yes{% else %}no{% endif %}</div>
+  </div></div>
+{% endif %}
+
+  <div class="d-flex justify-content-between mt-4">
+    {% if step > 1 %}<a class="btn btn-outline-secondary" href="{% url 'setup_step' step|add:'-1' %}"><i class="bi bi-arrow-left"></i> Back</a>{% else %}<span></span>{% endif %}
+    <button class="btn btn-dark" type="submit">{% if step == 4 %}<i class="bi bi-check2-circle"></i> Finish setup{% else %}Next <i class="bi bi-arrow-right"></i>{% endif %}</button>
+  </div>
+</div></form>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const $ = s => document.querySelector(s);
+  {% if step == 2 %}
+  $('#gen_btn').addEventListener('click', () => {
+    const p = $('#gen_prefix').value.trim(), a = +$('#gen_from').value, b = Math.min(+$('#gen_to').value, 60), out = [];
+    for (let i = a; i <= b; i++) out.push((p + ' ' + i).trim());
+    $('#id_classes_text').value = out.join('\n');
+  });
+  {% endif %}
+  {% if step == 3 %}
+  const countEl = $('#id_exam_count'), rows = [...document.querySelectorAll('.exam-row')];
+  let touched = false;
+  rows.forEach(r => r.querySelectorAll('input').forEach(i => i.addEventListener('input', () => { touched = true; total(); })));
+  function defaults(n) {
+    if (n === 3) return [['Sessional 1', 20], ['Sessional 2', 20], ['Final', 60]];
+    if (n === 1) return [['Final Exam', 100]];
+    const base = Math.floor(100 / n), out = [];
+    for (let i = 1; i <= n; i++) out.push(['Exam ' + i, i === n ? 100 - base * (n - 1) : base]);
+    return out;
+  }
+  function total() {
+    const n = Math.min(Math.max(+countEl.value || 1, 1), rows.length);
+    let t = 0; rows.slice(0, n).forEach(r => t += +r.querySelector('.exam-max').value || 0);
+    $('#exam_total').textContent = t;
+  }
+  function show() {
+    const n = Math.min(Math.max(+countEl.value || 1, 1), rows.length);
+    if (!touched) defaults(n).forEach((d, i) => { rows[i].querySelector('.exam-name').value = d[0]; rows[i].querySelector('.exam-max').value = d[1]; });
+    rows.forEach((r, i) => { r.style.display = i < n ? '' : 'none'; });
+    total();
+  }
+  countEl.addEventListener('input', show); show();
+  {% endif %}
+</script>
+{% endblock %}
